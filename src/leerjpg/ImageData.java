@@ -10,12 +10,11 @@ import java.io.File;
 import java.awt.MediaTracker;
 
 public class ImageData {
-  public void escalar(String folder) {
+  public void escalar(String folder, String out) {
     // imagen origen
     try {
       Image img = new ImageIcon(folder).getImage();
-
-      Image newimg = img.getScaledInstance(350, 350, java.awt.Image.SCALE_SMOOTH);
+      Image newimg = img.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
 
       // wait for image to be ready
       MediaTracker tracker = new MediaTracker(new java.awt.Container());
@@ -26,10 +25,11 @@ public class ImageData {
         throw new RuntimeException("Image loading interrupted", ex);
       }
 
+      // save
       BufferedImage bi = this.imageToBufferedImage(newimg);
-
-      File outputfile = new File("/home/gerald/deeplearning/trabajo/DeepLearning/src/leerjpg/saved.png");
+      File outputfile = new File(out);
       ImageIO.write(bi, "png", outputfile);
+
     } catch (Exception e) {
       // TODO: handle exception
       System.err.println(e);
