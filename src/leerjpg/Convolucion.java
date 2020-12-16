@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.nio.file.Paths;
 import java.util.List;
@@ -30,9 +31,10 @@ public final class Convolucion extends Component {
     // String path =
     // "C:\\Users\\carlo\\Documents\\NetBeansProjects\\leerjpg\\src\\leerjpg\\gris_img\\animals\\cats";
     String[] files = getFiles(path);
-    double[][] mat = new double[60][25];
+
     if (files != null) {
       int size = files.length;
+      double[][] entradas = new double[size][];
 
       for (int i = 0; i < size; i++) {
         // System.out.println( files[ i ] );
@@ -40,6 +42,7 @@ public final class Convolucion extends Component {
         double[][] imagenmatrix = escalar(img);
         double[] entrada = new double[25];
         entrada = cnn(imagenmatrix);
+        entradas[i] = entrada;
 
         // System.out.printf("\nVector generado de entrada a la red neuronal de la
         // imagen"+ files[i]+ ":\n");
@@ -49,6 +52,32 @@ public final class Convolucion extends Component {
           // System.out.printf("%11.4f",mat[size][aux]);
         }
         System.out.printf("\n\n=========\n\n");
+      }
+      escritura(entradas);
+
+    }
+  }
+
+  public static void escritura(double[][] entradas) {
+    FileWriter fichero = null;
+    PrintWriter pw = null;
+    try {
+      fichero = new FileWriter("data");
+      pw = new PrintWriter(fichero);
+
+      for (int i = 0; i < entradas.length; i++)
+        pw.println(Arrays.toString(entradas[i]));
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        // Nuevamente aprovechamos el finally para
+        // asegurarnos que se cierra el fichero.
+        if (null != fichero)
+          fichero.close();
+      } catch (Exception e2) {
+        e2.printStackTrace();
       }
     }
   }
