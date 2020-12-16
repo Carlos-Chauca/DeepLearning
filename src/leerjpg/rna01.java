@@ -6,6 +6,8 @@
 package leerjpg;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  *
@@ -207,16 +209,31 @@ public class rna01 {
       g[i] = y[i] * (1 - y[i]) * pls;
       pls = 0;
     }
-
+    ArrayList<Thread> hilos = new ArrayList<Thread>();
     // ++++capa2 w
     ii = c[0] * c[1];// capa1*capa2
     for (int i = 0; i < c[2]; i++) {
-      for (int j = 0; j < c[1]; j++) {
-        w[ii] = w[ii] + g[i + c[1]] * y[j];
-        ii++;
-      }
-    }
+      int tempII = ii;
+      Function<Integer, Integer> fun = new Function<Integer, Integer>() {
+        @Override
+        public Integer apply(Integer t) {
+          // TODO Auto-generated method stub
+          for (int j = 0; j < c[1]; j++) {
+            w[tempII] = w[tempII] + g[i + c[1]] * y[j];
 
+          }
+          return null;
+        }
+      };
+      Thread t = new Mythread(fun);
+
+      hilos.add(t);
+      t.start();
+      ii++;
+    }
+    for (Thread thread : hilos) {
+      thread.join();
+    }
     // ++++capa1 w
     ii = 0;// capa0*capa1
     for (int i = 0; i < c[1]; i++) {
@@ -301,5 +318,40 @@ public class rna01 {
 
     // System.out.println("-----------****Fin Test****----------");
 
+  }
+
+  public static void main(String[] args) {
+    int io = 99;
+    Function<Integer, Integer> p = new Function<Integer, Integer>() {
+      @Override
+      public Integer apply(Integer a) {
+
+        System.out.println("xd " + io);
+        return 0;
+      }
+    };
+    // p.apply(0);
+    new Mythread(p).start();
+    new Mythread(p).start();
+
+    new Mythread(p).start();
+
+  }
+
+}
+
+class Mythread extends Thread {
+  Function<Integer, Integer> mypredicate;
+
+  public Mythread(Function<Integer, Integer> mypredicate) {
+    super();
+    this.mypredicate = mypredicate;
+  }
+
+  @Override
+  public void run() {
+    // TODO Auto-generated method stub
+    super.run();
+    this.mypredicate.apply(0);
   }
 }

@@ -18,43 +18,44 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public final class Convolucion extends Component {
-  public static void main(String[] foo) throws IOException {
-    lectura(0);
 
+  public static void main(String[] foo) throws IOException {
+    lectura();
   }
 
-  public static void lectura(int k) throws IOException {
-    String path = Paths.get(System.getProperty("user.dir"), "mnist", "" + k).toString();
-    // "C:\\Users\\carlo\\Documents\\NetBeansProjects\\leerjpg\\src\\leerjpg\\mnist\\"
+  public static void lectura() throws IOException {
+    String __dirname = System.getProperty("user.dir");
+    String[] categorias = { "cats", "dogs", "panda" };
+    String path = Paths.get(__dirname, "..", "..", "animals", "gris_img", "animals", "cats").toString();
 
+    // String path =
+    // "C:\\Users\\carlo\\Documents\\NetBeansProjects\\leerjpg\\src\\leerjpg\\gris_img\\animals\\cats";
     String[] files = getFiles(path);
-    double[][] mat = new double[10][25];
 
     if (files != null) {
       int size = files.length;
       double[][] entradas = new double[size][];
+
       for (int i = 0; i < size; i++) {
         // System.out.println( files[ i ] );
         BufferedImage img = ImageIO.read(new File(files[i]));
         double[][] imagenmatrix = escalar(img);
         double[] entrada = new double[25];
-
         entrada = cnn(imagenmatrix);
         entradas[i] = entrada;
-        // escritura(entrada);
-        System.out.printf("\nVector generado de entrada a la red neuronal de la imagen" + files[i] + ":\n");
+
+        // System.out.printf("\nVector generado de entrada a la red neuronal de la
+        // imagen"+ files[i]+ ":\n");
         for (int aux = 0; aux < 25; aux++) {
           System.out.printf("%11.4f", entrada[aux]);
-
+          // mat[size][aux]=(int)entrada[aux];
+          // System.out.printf("%11.4f",mat[size][aux]);
         }
-        System.out.printf("\n\n\n\n");
-
+        System.out.printf("\n\n=========\n\n");
       }
       escritura(entradas);
-      // double[] y = { 1, 23, 4 };
-      // System.out.println(Arrays.toString(y));
+
     }
-    // printmatriz(mat);
   }
 
   public static void escritura(double[][] entradas) {
@@ -145,7 +146,7 @@ public final class Convolucion extends Component {
       for (int j = 0; j < m[i].length; j++) {
         v[cont] = m[i][j];
         cont++;
-        // System.out.println("cont:"+cont);ç
+        // System.out.println("cont:"+cont);
       }
     }
     double n = maximovector(v);
@@ -195,19 +196,6 @@ public final class Convolucion extends Component {
       }
     }
     return mcon;
-  }
-
-  public static double[][] separar(double m[][], int x, int y, int max) {
-    double[][] aux = new double[max][max];
-    for (int k = x, a = 0; k < max + x; k++, a++) {
-      for (int l = y, b = 0; l < max + y; l++, b++) {
-        // System.out.printf("%11.1f", m[k][l]);
-        aux[a][b] = m[k][l];
-        // System.out.printf("%11.1f", aux[a][b]);
-      }
-      // System.out.printf("\n");
-    }
-    return aux;
   }
 
   public static double multiplicación(double[][] A, double[][] B) {
@@ -311,12 +299,15 @@ public final class Convolucion extends Component {
         cont++;
       }
     }
-    int dim_2 = pooling2_1.length * pooling2_1.length;
+    int dim_2 = (pooling2_1.length * pooling2_1.length) / 100;
     // generamos el vector de dimension dim
     double[] vector_fin = new double[dim_2];
     int cont_2 = 0;
     for (int k = 0; k < dim_2; k++) {
-      vector_fin[cont_2] = vector_ini[k] + vector_ini[k + 1] + vector_ini[k + 2] + vector_ini[k + 3];
+      vector_fin[cont_2] = 0;
+      for (int z = 0; z < 100; z++) {
+        vector_fin[cont_2] = vector_fin[cont_2] + vector_ini[(cont_2) * 100 + z];
+      }
       cont_2++;
     }
     double max = maximovector(vector_fin);
@@ -338,7 +329,9 @@ public final class Convolucion extends Component {
       List<String> res = new ArrayList<>();
       File[] arr_content = f.listFiles();
 
-      for (int i = 0; i < arr_content.length; i++) {
+      int size = arr_content.length;
+
+      for (int i = 0; i < size; i++) {
 
         if (arr_content[i].isFile())
           res.add(arr_content[i].toString());
@@ -364,5 +357,31 @@ public final class Convolucion extends Component {
         System.out.println("");
       }
     }
+  }
+
+  public static void convertGray(BufferedImage image, String image_name) throws IOException {
+    int w = image.getWidth();
+    int h = image.getHeight();
+    BufferedImage img = image;
+    System.out.println("width, height: " + w + ", " + h);
+    for (int i = 0; i < img.getHeight(); i++) {
+      for (int j = 0; j < img.getWidth(); j++) {
+        int pixel = img.getRGB(j, i);
+        int alpha = (pixel >> 24) & 0xff;
+        int red = (pixel >> 16) & 0xff;
+        int green = (pixel >> 8) & 0xff;
+        int blue = (pixel) & 0xff;
+        float rr = (float) Math.pow(red / 255.0, 2.2);
+        float gg = (float) Math.pow(green / 255.0, 2.2);
+        float bb = (float) Math.pow(blue / 255.0, 2.2);
+        float Y = (float) (0.2126 * rr + 0.7152 * gg + 0.0722 * bb);
+        int grayPixel = (int) (255.0 * Math.pow(Y, 1.0 / 2.2));
+        int gray = (alpha << 24) + (grayPixel << 16) + (grayPixel << 8) + grayPixel;
+        img.setRGB(j, i, gray);
+      }
+    }
+    File myNewJPegFile = new File(
+        System.getProperty("user.dir") + "\\src\\leerjpg\\gris_img\\images\\" + image_name + ".jpg");
+    ImageIO.write(img, "jpg", myNewJPegFile);
   }
 }
