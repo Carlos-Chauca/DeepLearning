@@ -10,24 +10,36 @@ import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public final class Convolucion extends Component {
 
-  public static void main(String[] foo) throws IOException {
-    lectura();
-  }
+  // public static void main(String[] foo) throws IOException {
+  // lectura();
+
+  // ThreadPool t = new ThreadPool(3, 10);
+
+  // }
 
   public static void lectura() throws IOException {
     String __dirname = System.getProperty("user.dir");
-    String[] categorias = { "cats", "dogs", "panda" };
-    String path = Paths.get(__dirname, "..", "..", "animals", "gris_img", "animals", "cats").toString();
-
+    // String[] categorias = { "cats", "dogs", "panda" };
+    String path = Paths.get(__dirname, "miniAnimals", "cats").toString();
+    String path2 = Paths.get(__dirname, "miniAnimals", "dogs").toString();
+    String path3 = Paths.get(__dirname, "miniAnimals", "panda").toString();
     // String path =
     // "C:\\Users\\carlo\\Documents\\NetBeansProjects\\leerjpg\\src\\leerjpg\\gris_img\\animals\\cats";
     String[] files = getFiles(path);
@@ -43,19 +55,19 @@ public final class Convolucion extends Component {
         double[] entrada = new double[25];
         entrada = cnn(imagenmatrix);
         entradas[i] = entrada;
-
-        // System.out.printf("\nVector generado de entrada a la red neuronal de la
-        // imagen"+ files[i]+ ":\n");
-        for (int aux = 0; aux < 25; aux++) {
-          System.out.printf("%11.4f", entrada[aux]);
-          // mat[size][aux]=(int)entrada[aux];
-          // System.out.printf("%11.4f",mat[size][aux]);
-        }
+        System.out.println("entrada numero " + i);
         System.out.printf("\n\n=========\n\n");
       }
       escritura(entradas);
 
     }
+    use(path, path2, path3);
+  }
+
+  public static void use(String s1, String s2, String s3) {
+    System.out.println(s1);
+    System.out.println(s2);
+    System.out.println(s3);
   }
 
   public static void escritura(double[][] entradas) {
@@ -180,6 +192,7 @@ public final class Convolucion extends Component {
 
   public static double[][] convolucion(double[][] m, double[][] n) {
     double[][] mcon = new double[m.length - n.length + 1][m.length - n.length + 1];
+
     for (int x = 0; x < m.length - n.length + 1; x++) {
       for (int y = 0; y < m.length - n.length + 1; y++) {
         double[][] aux = new double[n.length][n.length];
@@ -192,10 +205,32 @@ public final class Convolucion extends Component {
           // System.out.printf("\n");
         }
         mcon[x][y] = multiplicación(aux, n);
-        // System.out.println("------");
+        // System.out.println("----x=" + x + "y =" + y);
       }
     }
     return mcon;
+  }
+
+  public static Double[] cortar(double[][] mat, int x0, int y0, int xf, int yf) {
+    Double[] ret = new Double[(xf - x0) * (yf - y0)];
+    int k = 0;
+    for (int i = x0; i < xf; i++) {
+      for (int j = y0; j < yf; j++) {
+        ret[k++] = mat[i][j];
+      }
+    }
+    return ret;
+  }
+
+  public static Double[] vectorizar(double[][] mat) {
+    Array<Double> a;
+    for (double[] vector : mat) {
+      for (double value : vector) {
+        a.add(value);
+      }
+    }
+
+    return a;
   }
 
   public static double multiplicación(double[][] A, double[][] B) {
