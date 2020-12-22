@@ -25,58 +25,56 @@ import javax.swing.JLabel;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public final class Convolucion extends Component {
+public class Convolucion extends Component {
 
   // public static void main(String[] foo) throws IOException {
   // lectura();
-
-  // ThreadPool t = new ThreadPool(3, 10);
-
   // }
 
-  public static void lectura() throws IOException {
+  public void lectura() {
     String __dirname = System.getProperty("user.dir");
-    // String[] categorias = { "cats", "dogs", "panda" };
-    String path = Paths.get(__dirname, "miniAnimals", "cats").toString();
-    String path2 = Paths.get(__dirname, "miniAnimals", "dogs").toString();
-    String path3 = Paths.get(__dirname, "miniAnimals", "panda").toString();
+    String[] cate = { "cats", "dogs", "panda" };
+    List<String> categorias = Arrays.asList(cate);
+    List<String> rutas = new ArrayList<String>();
+    Function<String, String> getMiniA = (dir) -> Paths.get(__dirname, "miniAnimals", dir).toString();
+    categorias.forEach(x -> rutas.add(getMiniA.apply(x)));
     // String path =
     // "C:\\Users\\carlo\\Documents\\NetBeansProjects\\leerjpg\\src\\leerjpg\\gris_img\\animals\\cats";
-    String[] files = getFiles(path);
 
-    if (files != null) {
-      int size = files.length;
-      double[][] entradas = new double[size][];
-
-      for (int i = 0; i < size; i++) {
-        // System.out.println( files[ i ] );
-        BufferedImage img = ImageIO.read(new File(files[i]));
-        double[][] imagenmatrix = escalar(img);
-        double[] entrada = new double[25];
-        entrada = cnn(imagenmatrix);
-        entradas[i] = entrada;
-        System.out.println("entrada numero " + i);
-        System.out.printf("\n\n=========\n\n");
+    rutas.forEach(path -> {
+      String[] files = getFiles(path);
+      if (files != null) {
+        int i = 0;
+        double[][] entradas = new double[files.length][];
+        for (String f : files) {
+          System.out.println("entrada  numero " + i);
+          entradas[i++] = ImageConvolucion(f);
+          System.out.printf("\n\n=========\n\n");
+        }
+        escritura(entradas);
       }
-      escritura(entradas);
-
-    }
-    use(path, path2, path3);
+    });
   }
 
-  public static void use(String s1, String s2, String s3) {
-    System.out.println(s1);
-    System.out.println(s2);
-    System.out.println(s3);
+  public double[] ImageConvolucion(String file) {
+    try {
+      BufferedImage img = ImageIO.read(new File(file));
+      double[][] imagenmatrix = escalar(img);
+      return cnn(imagenmatrix);
+    } catch (IOException e) {
+      return null;
+      // TODO: handle exception
+    }
   }
 
   public static void escritura(double[][] entradas) {
     FileWriter fichero = null;
     PrintWriter pw = null;
+
     try {
       fichero = new FileWriter("data");
       pw = new PrintWriter(fichero);
-
+      // entradasList.forEach(x -> pw.println(x.toString()));
       for (int i = 0; i < entradas.length; i++)
         pw.println(Arrays.toString(entradas[i]));
 
@@ -181,7 +179,7 @@ public final class Convolucion extends Component {
       for (int j = 0; j < img.getWidth(); j++) {
         // double mediapixel, colorSRGB;
         Color c = new Color(img.getRGB(j, i));
-        double pi = c.getRed();
+        double pi = (c.getRed() + c.getGreen() + c.getBlue()) / 3;
         // System.out.printf("%.2f " ,(pi/255));
         matriz[i][j] = (pi / 255);
       }
@@ -190,25 +188,84 @@ public final class Convolucion extends Component {
     return matriz;
   }
 
-  public static double[][] convolucion(double[][] m, double[][] n) {
+  public double[][] convolucion(double[][] m, double[][] n) {
     double[][] mcon = new double[m.length - n.length + 1][m.length - n.length + 1];
-
+    ArrayList<Double> vectN = vectorizar(n);
     for (int x = 0; x < m.length - n.length + 1; x++) {
       for (int y = 0; y < m.length - n.length + 1; y++) {
-        double[][] aux = new double[n.length][n.length];
-        for (int k = x, a = 0; k < n.length + x; k++, a++) {
-          for (int l = y, b = 0; l < n.length + y; l++, b++) {
-            // System.out.printf("%11.1f", m[k][l]);
-            aux[a][b] = m[k][l];
-            // System.out.printf("%11.1f", aux[a][b]);
-          }
-          // System.out.printf("\n");
-        }
-        mcon[x][y] = multiplicación(aux, n);
+
+        // double[][] aux = new double[n.length][n.length];
+        // for (int k = x, a = 0; k < n.length + x; k++, a++) {
+        // for (int l = y, b = 0; l < n.length + y; l++, b++) { //
+        // System.out.printf("%11.1f", m[k][l]);
+        // aux[a][b] = m[k][l]; //
+        // System.out.printf("%11.1f", aux[a][b]);
+        // } // System.out.printf("\n");
+
+        // }
+
+        // Double[][] aux2 = cortarTemp(m, x, y, n.length + x, n.length + y);
+        Double[] aux3 = cortar(m, x, y, n.length + x, n.length + y);
+        // System.out.println(compare(aux, aux2));
+
+        // if (!compare(aux, aux2))
+        // System.out.println(vec2String(aux3) + "\n" + mat2String(aux2) + "\n///////");
+        // mcon[x][y] = multiplicación(aux, n);
+        mcon[x][y] = multiplicación2(aux3, vectN);
+        // System.out.println(mcon[x][y] + " " + tem2 + " " + ((double) mcon[x][y] ==
+        // (double) tem2));
         // System.out.println("----x=" + x + "y =" + y);
       }
     }
     return mcon;
+  }
+
+  public String mat2String(double[][] m) {
+    String s = "";
+    for (double[] ds : m) {
+      for (double ds2 : ds) {
+        s += " " + ds2;
+      }
+    }
+    return s;
+  }
+
+  public String vec2String(Double[] v) {
+    String s = "";
+    for (Double double1 : v) {
+      s += " " + double1;
+    }
+    return s;
+  }
+
+  public String mat2String(Double[][] m) {
+    String s = "";
+    for (Double[] ds : m) {
+      for (Double ds2 : ds) {
+        s += " " + ds2;
+      }
+    }
+    return s;
+  }
+
+  public boolean compare(double[][] mat1, Double[][] mat2) {
+    if (!(mat1.length == mat2.length && mat1[0].length == mat2[0].length)) {
+      System.out.println("dif leng  ");
+      return false;
+    }
+    int i, j = 0;
+    for (Double[] doubles : mat2) {
+      i = 0;
+      for (Double doubles2 : doubles) {
+        if ((double) doubles2 != (double) mat1[j][i]) {
+          System.out.println("dif value   " + (double) doubles2 + " " + (double) mat1[i][j]);
+          return false;
+        }
+        i++;
+      }
+      j++;
+    }
+    return true;
   }
 
   public static Double[] cortar(double[][] mat, int x0, int y0, int xf, int yf) {
@@ -222,8 +279,19 @@ public final class Convolucion extends Component {
     return ret;
   }
 
-  public static Double[] vectorizar(double[][] mat) {
-    Array<Double> a;
+  public static Double[][] cortarTemp(double[][] mat, int x0, int y0, int xf, int yf) {
+    Double[][] ret = new Double[(xf - x0)][(yf - y0)];
+    // int k = 0;
+    for (int i = x0; i < xf; i++) {
+      for (int j = y0; j < yf; j++) {
+        ret[i - x0][j - y0] = mat[i][j];
+      }
+    }
+    return ret;
+  }
+
+  public static ArrayList<Double> vectorizar(double[][] mat) {
+    ArrayList<Double> a = new ArrayList<Double>();
     for (double[] vector : mat) {
       for (double value : vector) {
         a.add(value);
@@ -243,6 +311,15 @@ public final class Convolucion extends Component {
     return a;
   }
 
+  public double multiplicación2(Double[] v1, ArrayList<Double> v2) {
+    double d = 0;
+    for (int i = 0; i < v1.length; i++) {
+      d += v1[i] * v2.get(i);
+    }
+
+    return d;
+  }
+
   public static void printPixelARGB(int pixel) {
     int alpha = (pixel >> 24) & 0xff;
     int red = (pixel >> 16) & 0xff;
@@ -252,7 +329,7 @@ public final class Convolucion extends Component {
 
   }
 
-  public static double[] cnn(double[][] imagenmatrix) {
+  public double[] cnn(double[][] imagenmatrix) {
     // kernel 1
     double[][] kernel_1 = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } };
     // kernel 2
@@ -302,38 +379,36 @@ public final class Convolucion extends Component {
     // dim contiene la dimension del vector
     int dim = pooling2_1.length * pooling2_1.length * 4;
     // generamos el vector de dimension dim
-    double[] vector_ini = new double[dim];
+    // double[] vector_ini = new double[dim];
     int cont = 0;
-    // añadimos la 1ra matriz a los 25 primeros valores del vector
-    for (int i = 0; i < pooling2_1.length; i++) {
-      for (int j = 0; j < pooling2_1.length; j++) {
-        vector_ini[cont] = pooling2_1[i][j];
-        cont++;
-      }
-    }
-    // añadimos la 2da matriz a los 25 proximos valores del vector
-    for (int i = 0; i < pooling2_2.length; i++) {
-      for (int j = 0; j < pooling2_2.length; j++) {
-        vector_ini[cont] = pooling2_2[i][j];
-        cont++;
-      }
-    }
+    ArrayList<Double> vector_ini, part1, part2, part3, part4;
+    vector_ini = new ArrayList<Double>();
+    part1 = vectorizar(pooling2_1);
+    part2 = vectorizar(pooling2_2);
+    part3 = vectorizar(pooling2_3);
+    part4 = vectorizar(pooling2_4);
+    vector_ini.addAll(part1);
+    vector_ini.addAll(part2);
+    vector_ini.addAll(part3);
+    vector_ini.addAll(part4);
+    /*
+     * // añadimos la 1ra matriz a los 25 primeros valores del vector for (int i =
+     * 0; i < pooling2_1.length; i++) { for (int j = 0; j < pooling2_1.length; j++)
+     * { vector_ini[cont] = pooling2_1[i][j]; cont++; } }
+     * 
+     * // añadimos la 2da matriz a los 25 proximos valores del vector for (int i =
+     * 0; i < pooling2_2.length; i++) { for (int j = 0; j < pooling2_2.length; j++)
+     * { vector_ini[cont] = pooling2_2[i][j]; cont++; } }
+     * 
+     * // añadimos la 3ra matriz a los 25 proximos valores del vector for (int i =
+     * 0; i < pooling2_3.length; i++) { for (int j = 0; j < pooling2_3.length; j++)
+     * { vector_ini[cont] = pooling2_3[i][j]; cont++; } }
+     * 
+     * // añadimos la 4ta matriz a los 25 proximos valores del vector for (int i =
+     * 0; i < pooling2_4.length; i++) { for (int j = 0; j < pooling2_4.length; j++)
+     * { vector_ini[cont] = pooling2_4[i][j]; cont++; } }
+     */
 
-    // añadimos la 3ra matriz a los 25 proximos valores del vector
-    for (int i = 0; i < pooling2_3.length; i++) {
-      for (int j = 0; j < pooling2_3.length; j++) {
-        vector_ini[cont] = pooling2_3[i][j];
-        cont++;
-      }
-    }
-
-    // añadimos la 4ta matriz a los 25 proximos valores del vector
-    for (int i = 0; i < pooling2_4.length; i++) {
-      for (int j = 0; j < pooling2_4.length; j++) {
-        vector_ini[cont] = pooling2_4[i][j];
-        cont++;
-      }
-    }
     int dim_2 = (pooling2_1.length * pooling2_1.length) / 100;
     // generamos el vector de dimension dim
     double[] vector_fin = new double[dim_2];
@@ -341,7 +416,7 @@ public final class Convolucion extends Component {
     for (int k = 0; k < dim_2; k++) {
       vector_fin[cont_2] = 0;
       for (int z = 0; z < 100; z++) {
-        vector_fin[cont_2] = vector_fin[cont_2] + vector_ini[(cont_2) * 100 + z];
+        vector_fin[cont_2] = vector_fin[cont_2] + vector_ini.get((cont_2) * 100 + z);
       }
       cont_2++;
     }
@@ -354,29 +429,19 @@ public final class Convolucion extends Component {
   }
 
   public static String[] getFiles(String dir_path) {
-
     String[] arr_res = null;
-
     File f = new File(dir_path);
-
     if (f.isDirectory()) {
-
       List<String> res = new ArrayList<>();
       File[] arr_content = f.listFiles();
-
       int size = arr_content.length;
-
       for (int i = 0; i < size; i++) {
-
         if (arr_content[i].isFile())
           res.add(arr_content[i].toString());
       }
-
       arr_res = res.toArray(new String[0]);
-
     } else
       System.err.println("¡ Path NO válido !");
-
     return arr_res;
   }
 

@@ -27,26 +27,14 @@ public class rna01 {
   ////////////////// double
   ////////////////// prueba[][]={{0,1,0},{0,1,1},{1,0,0},{1,0,1},{1,1,1},{0,0,0},{1,1,0}};
 
-  // double test1[]={0,1,0}; usored(test1);
-  // double test2[]={0,1,1}; usored(test2);
-  // double test3[]={1,0,0}; usored(test3);
-  // double test4[]={1,0,1}; usored(test4);
-  // double test5[]={1,1,1}; usored(test5);
-  // double test6[]={0,0,0}; usored(test6);
-  // double test7[]={1,1,0}; usored(test7);
-
-  // double y[]={0,0,0};
   double y[];
 
-  // double w[]={2,-2,0,1,3,-1,3,-2};
-  // double s[]={0,0,0};
   double s[];
   double g[];
-  // double g[]={0,0,0};
   double w[];
 
-  // int c[] = {3,2,1};//capas de datos
   int c[] = new int[3];// capas de datos
+  // capa de ingrso , capa e salida , capa oculta
 
   public rna01(int ci_, int co_, int cs_) {
     int ci = ci_;
@@ -70,31 +58,6 @@ public class rna01 {
     for (int i = 0; i < w.length; i++) {
       w[i] = getRandom();
     }
-
-    // for(int i=0;i<500;i++) entrenamiento(0);
-    // for(int i=0;i<500;i++) entrenamiento(1);
-    // for(int i=0;i<500;i++) entrenamiento(2);
-    // for(int i=0;i<500;i++) entrenamiento(3);
-    //
-    //
-    // double test[]={0,1,0}; usored(test);
-    // double test2[]={0,1,1}; usored(test2);
-    // double test3[]={1,0,0}; usored(test3);
-    // double test4[]={1,0,1}; usored(test4);
-
-    // for(int i=0;i<500;i++){
-    // entrenamiento(0);
-    // entrenamiento(1);
-    // entrenamiento(2);
-    // entrenamiento(3);
-    // }
-    // double test1[]={0,1,0}; usored(test1);
-    // double test2[]={0,1,1}; usored(test2);
-    // double test3[]={1,0,0}; usored(test3);
-    // double test4[]={1,0,1}; usored(test4);
-    // double test5[]={1,1,1}; usored(test5);
-    // double test6[]={0,0,0}; usored(test6);
-    // double test7[]={1,1,0}; usored(test7);
 
   }
 
@@ -214,26 +177,13 @@ public class rna01 {
     ii = c[0] * c[1];// capa1*capa2
     for (int i = 0; i < c[2]; i++) {
       int tempII = ii;
-      Function<Integer, Integer> fun = new Function<Integer, Integer>() {
-        @Override
-        public Integer apply(Integer t) {
-          // TODO Auto-generated method stub
-          for (int j = 0; j < c[1]; j++) {
-            w[tempII] = w[tempII] + g[i + c[1]] * y[j];
-
-          }
-          return null;
-        }
-      };
-      Thread t = new Mythread(fun);
-
-      hilos.add(t);
-      t.start();
+      // TODO Auto-generated method stub
+      for (int j = 0; j < c[1]; j++) {
+        w[tempII] = w[tempII] + g[i + c[1]] * y[j];
+      }
       ii++;
     }
-    for (Thread thread : hilos) {
-      thread.join();
-    }
+
     // ++++capa1 w
     ii = 0;// capa0*capa1
     for (int i = 0; i < c[1]; i++) {
@@ -317,24 +267,6 @@ public class rna01 {
     System.out.println();
 
     // System.out.println("-----------****Fin Test****----------");
-
-  }
-
-  public static void main(String[] args) {
-    int io = 99;
-    Function<Integer, Integer> p = new Function<Integer, Integer>() {
-      @Override
-      public Integer apply(Integer a) {
-
-        System.out.println("xd " + io);
-        return 0;
-      }
-    };
-    // p.apply(0);
-    new Mythread(p).start();
-    new Mythread(p).start();
-
-    new Mythread(p).start();
 
   }
 
