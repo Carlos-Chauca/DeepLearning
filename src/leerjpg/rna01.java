@@ -15,9 +15,9 @@ import java.util.function.Predicate;
  */
 public class rna01 {
   static final Random rand = new Random();
-  int ci;
-  int co;
-  int cs;
+  int ci;// capa de ingreso
+  int co; // capa oculta
+  int cs;// capa intermedia
 
   double xin[][];// ={{0,1,0},{0,1,1},{1,0,0},{1,0,1}};
   // double xin[][]={{0,1,0},{0,1,1},{1,0,0},{1,0,1}};
