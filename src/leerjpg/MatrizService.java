@@ -171,4 +171,17 @@ public class MatrizService {
     return ret;
   }
 
+  public double[][] getXArray(ArrayList<MyData> myDatas) {
+
+    double[][] ret = new double[myDatas.size()][];
+    for (int i = 0; i < myDatas.size(); i++) {
+      ret[i] = new double[myDatas.get(i).X.size()];
+      for (int j = 0; j < myDatas.get(i).X.size(); j++) {
+        ret[i][j] = myDatas.get(i).X.get(j);
+
+      }
+    }
+    return ret;
+  }
+
 }
