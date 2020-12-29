@@ -32,14 +32,17 @@ public class Main {
         double[][] x = matrizService.getXArray(data);
         double[][] y = new double[data.size()][];
         double[] yv = matrizService.getYArray(data);
+
         // System.out.println(yv);
+        double maximo = matrizService.maximovector(yv);
         for (int i = 0; i < yv.length; i++) {
             y[i] = new double[1];
-            y[i][0] = yv[i];
+            System.out.println(yv[i]);
+            y[i][0] = yv[i] / maximo;
         }
-
-        rna01 red = new rna01(x[0].length, 100, 1);
-        red.entrenamiento(x, y, 600);
+        // System.out.println(yv.length);
+        rna01 red = new rna01(x[0].length, 150, 1);
+        red.entrenamiento(x, y, 1000);
         // System.out.println(con.lectura().toString());
         /*
          * double[][] mat1 = { { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }

@@ -63,16 +63,22 @@ public class Convolucion2 {
 
   public ArrayList<MyData> lectura() {
     String __dirname = System.getProperty("user.dir");
-    String[] cate = { "BEANS", "CAKE" };
+    String[] cate = // { "BEANS", "CAKE","" };
+        // { "BEANS", "CAKE", "CANDY", "CEREAL", "CHIPS", "CHOCOLATE", "COFFEE", "CORN",
+        // "FISH", "FLOUR", "HONEY", "JAM",
+        // "JUICE", "MILK", "NUTS", "OIL", "PASTA", "RICE", "SODA", "SPICES", "SUGAR",
+        // "TEA", "TOMATO_SAUCE",
+        // "VINEGAR", "WATER" };
+        { "1", "2", "3", "4", "5" };
     List<String> categorias = Arrays.asList(cate);
     List<pathName> rutas = new ArrayList<pathName>();
-    Function<String, String> getMiniA = (dir) -> Paths.get(__dirname, "miniAnimals", "images_gris", dir).toString();
+    Function<String, String> getMiniA = (dir) -> Paths.get(__dirname, "miniAnimals", "img_parcial", dir).toString();
     categorias.forEach(x -> rutas.add(new pathName(x, getMiniA.apply(x))));
     double[] y = { 0 };// sino no deja usar en el escope de para el foreach
     // String path =
     // "C:\\Users\\carlo\\Documents\\NetBeansProjects\\leerjpg\\src\\leerjpg\\gris_img\\animals\\cats";
     ArrayList<MyData> ret = new ArrayList<MyData>();
-
+    System.out.println(cate.length);
     rutas.forEach(path -> {
       String[] files = getFiles(path.path);
       if (files != null) {

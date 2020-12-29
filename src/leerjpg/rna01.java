@@ -6,9 +6,32 @@
 package leerjpg;
 
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+@FunctionalInterface
+interface MatOperations {
+  void apply();
+}
+
+class CallConv implements Callable<Double[][]> {
+  MatOperations f;
+
+  public CallConv(MatOperations f) {
+    this.f = f;
+  }
+
+  @Override
+  public Double[][] call() throws Exception {
+    // TODO Auto-generated method stub
+    f.apply();
+    return null;
+  }
+}
 
 /**
  *
@@ -108,16 +131,48 @@ public class rna01 {
     xout = sal;
     double[] error = new double[veces];
     for (int v = 0; v < veces; v++) {
-      for (int i = 0; i < xin.length; i++) {
-        entreno(i);
-      }
+      if (false) {
+        ExecutorService e = Executors.newFixedThreadPool(4);
+        List<CallConv> list = new ArrayList<>();
+
+        MatOperations f1 = () -> {
+          for (int i = 0; i < xin.length / 2; i++) {
+
+            entreno(i);
+
+          }
+        };
+
+        MatOperations f2 = () -> {
+          for (int i = xin.length / 2; i < xin.length; i++) {
+
+            entreno(i);
+
+          }
+        };
+        list.add(new CallConv(f1));
+        list.add(new CallConv(f2));
+        try {
+          e.invokeAll(list);
+        } catch (InterruptedException er) {
+          // TODO: handle exception
+          er.printStackTrace();
+        }
+        e.shutdown();
+      } else
+        for (int i = 0; i < xin.length; i++) {
+
+          entreno(i);
+
+        }
+
       // System.out.println("error " + getError(xin, xout));
       error[v] = getError(xin, xout);
     }
     System.out.println("errorMax " + error[0]);
 
     System.out.println("error" + error[error.length - 1]);
-
+    System.out.println(Arrays.toString(w));
     new G(error).graficar();
 
   }
@@ -130,7 +185,12 @@ public class rna01 {
     for (int i = 0; i < capaOculta; i++) {
       pls = 0;
       for (int j = 0; j < capaIngreso; j++) {
-        pls = pls + w[ii] * xin[xi][j];
+        try {
+          pls = pls + w[ii] * xin[xi][j];
+        } catch (ArrayIndexOutOfBoundsException e) {
+          // TODO: handle exception
+        }
+
         ii++;
       }
       z1[i] = pls; // i = i+ capa0
@@ -163,7 +223,8 @@ public class rna01 {
     for (int i = 0; i < out.length; i++) {
       out[i] = evaluar(i);
       for (int j = 0; j < out[i].length; j++) {
-        sum += Math.pow(out[i][j] - xout[i][j], 2) / (2);
+        double dif = out[i][j] - xout[i][j];
+        sum += (Math.pow(dif, 2)) / (2);
       }
     }
 
@@ -237,7 +298,12 @@ public class rna01 {
     pls = 0;
     for (int i = 0; i < capaOculta; i++) {
       for (int j = 0; j < capaIngreso; j++) {
-        pls = pls + w[ii] * xin[ci][j];
+        try {
+          pls = pls + w[ii] * xin[ci][j];
+        } catch (ArrayIndexOutOfBoundsException e) {
+          // TODO: handle exception
+        }
+
         ii++;
       }
       s[i] = pls; // i = i+ capa0
@@ -299,7 +365,12 @@ public class rna01 {
     ii = 0;// capa0*capa1
     for (int i = 0; i < capaOculta; i++) {
       for (int j = 0; j < capaIngreso; j++) {
-        w[ii] = w[ii] + 0.01 * g[i] * xin[ci][j];
+        try {
+          w[ii] = w[ii] + 0.01 * g[i] * xin[ci][j];
+        } catch (ArrayIndexOutOfBoundsException e) {
+          // TODO: handle exception
+        }
+
         ii++;
       }
     }
