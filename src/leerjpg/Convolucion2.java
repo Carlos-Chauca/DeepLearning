@@ -63,16 +63,22 @@ public class Convolucion2 {
 
   public ArrayList<MyData> lectura() {
     String __dirname = System.getProperty("user.dir");
-    String[] cate = { "cats", "dogs", "panda" };
+    String[] cate = // { "BEANS", "CAKE","" };
+        // { "BEANS", "CAKE", "CANDY", "CEREAL", "CHIPS", "CHOCOLATE", "COFFEE", "CORN",
+        // "FISH", "FLOUR", "HONEY", "JAM",
+        // "JUICE", "MILK", "NUTS", "OIL", "PASTA", "RICE", "SODA", "SPICES", "SUGAR",
+        // "TEA", "TOMATO_SAUCE",
+        // "VINEGAR", "WATER" };
+        { "1", "2", "3", "4", "5" };
     List<String> categorias = Arrays.asList(cate);
     List<pathName> rutas = new ArrayList<pathName>();
-    Function<String, String> getMiniA = (dir) -> Paths.get(__dirname, "miniAnimals", dir).toString();
+    Function<String, String> getMiniA = (dir) -> Paths.get(__dirname, "miniAnimals", "img_parcial", dir).toString();
     categorias.forEach(x -> rutas.add(new pathName(x, getMiniA.apply(x))));
     double[] y = { 0 };// sino no deja usar en el escope de para el foreach
     // String path =
     // "C:\\Users\\carlo\\Documents\\NetBeansProjects\\leerjpg\\src\\leerjpg\\gris_img\\animals\\cats";
     ArrayList<MyData> ret = new ArrayList<MyData>();
-
+    System.out.println(cate.length);
     rutas.forEach(path -> {
       String[] files = getFiles(path.path);
       if (files != null) {
@@ -81,11 +87,11 @@ public class Convolucion2 {
 
         for (String f : files) {
 
-          System.out.println("entrada  numero " + i);
+          // System.out.println("entrada numero " + i);
           entradas[i] = ImageConvolucion(f);
           ret.add(new MyData(matrizService.toArrayList(entradas[i]), y[0]));
           i++;
-          System.out.printf("\n\n=========\n\n");
+          // System.out.printf("\n\n=========\n\n");
         }
         // ret.add(matrizService.vectorizar(entradas));
         escritura(entradas, path.name);
@@ -262,7 +268,8 @@ public class Convolucion2 {
       cont_2++;
     }
     double max = matrizService.maximovector(vector_fin);
-    System.out.println(pooling1_[0].length + " " + pooling2_[0].length + " " + dim_2);
+    // System.out.println(pooling1_[0].length + " " + pooling2_[0].length + " " +
+    // dim_2);
     for (int k = 0; k < dim_2; k++) {
       vector_fin[k] = vector_fin[k] / max;
     }
